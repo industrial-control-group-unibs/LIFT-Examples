@@ -45,7 +45,7 @@ MaxJerk=5;
 switch_distance=1;
 waiting_time=8;
 motion_profile=1;
-cabin_offset=2.5; % it should be tuned based on the control performance
+cabin_offset=0; % it should be tuned based on the control performance
 
 Ts=1e-3;
 
