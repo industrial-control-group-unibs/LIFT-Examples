@@ -70,7 +70,7 @@ Ts=1e-3; % Sample period
 
 if (motion_profile==1)
     if (MaxVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
-        deceleration_distance=(CruiseVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
+        deceleration_distance=(MaxVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
     else % case 2
         deceleration_distance =MaxVel^(3/2)/MaxJerk^(1/2);
     end
