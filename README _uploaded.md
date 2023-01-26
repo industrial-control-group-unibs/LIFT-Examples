@@ -22,13 +22,13 @@ You have to use the library: [DYNAMICAL MODEL] "LumpedParameterLiftModel" and [C
 
 The simulink scheme consists of: (from left to right)
 
-![complete scheme](https://github.com/industrial-control-group-unibs/IMOCO-Lift-Motion-Law/blob/main/docs/Motion%20law%20-%20Single%20speed.png)
+![complete scheme](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/complete_model.png)
 
 1) The user simulator. To eliminate it, simply replace the output "destination_request" with a step with the desired floor number (the elevator starts at floor zero) 
 
 2) The lift control. The main part is the "lift logic control block" presented in the figure below, with its mask.
 
-![lift logic](https://github.com/industrial-control-group-unibs/IMOCO-Lift-Motion-Law/blob/main/docs/Motion%20law%20-%20Single%20speed.png)
+![lift logic](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/lift_logic.png)
 
 the inputs are:
 - floor switch (it sends the floor number when active, -1 if no switch is active)
@@ -45,7 +45,7 @@ In this block, there is also the PID implementation.
 
 3) Simulated Lift. This block contains the lift Dynamic model, the sensors simulation as shown below.
 
-![sensors](https://github.com/industrial-control-group-unibs/IMOCO-Lift-Motion-Law/blob/main/docs/Motion%20law%20-%20Single%20speed.png)
+![sensors](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/sensor.png)
 
 4) Assert if the lift crashes.
 
