@@ -56,7 +56,7 @@ proximity_distance=1; % distance of proximity sensor w.r.t. the floor (used in p
 MaxVel=1.5; % max velocity of the lift (m/s)
 MinVel=0.2; % low velocity of the lift (m/s)
 MaxAcc=1;   % max acceleration of the lift (m/s^2)
-MaxJerk=5;  % max jerk of the lift (m/s^3)
+MaxJerk=0.01%5;  % max jerk of the lift (m/s^3)
 
 waiting_time_open_door=2;    % Time to open the doors
 waiting_time_close_door=2;   % Time to close the doors
@@ -81,11 +81,14 @@ D=0;
 sys=ss(A,B,C,D);
 sysd=c2d(sys,Ts);
 
+
+total_inertia_on_motor_side=(Jm+gearbox^2*(Jp+(Mw+Mc)*Rp^2));
+
 %% tune controller (PI+ LowPassFilter)
 
 
 if 1
-    wc=20; % cut frequency
+    wc=30; % cut frequency
     filter=c2d(tf(1,[1/(10*wc) 1]),Ts); % filter frequency = 10*wc
     
     % the lift has an unstable pole (without control, it falls)
