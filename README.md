@@ -28,9 +28,9 @@ The simulink scheme consists of: \
 
 ![complete scheme](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/complete_model.png)
 
-(1) The user simulator. To eliminate it, simply replace the output "destination_request" with a step with the desired floor number (the elevator starts at floor zero) 
+(1) User simulator. To eliminate it, simply replace the output "destination_request" with a step with the desired floor number (the elevator starts at floor zero) 
 
-(2) The lift control. The main part is the "lift logic control block" presented in the figure below, with its mask.
+(2) Lift control. The main part is the "lift logic control block" presented in the figure below, with its mask.
 
 ![lift logic](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/lift_logic.png)
 
@@ -47,7 +47,7 @@ The outputs are:
 
 In this block, there is also the PID implementation.
 
-(3) Simulated Lift. This block contains the lift Dynamic model, the sensors simulation as shown below.
+(3) Simulated Lift. This block contains the lift Dynamics model, and the sensors simulation as shown below.
 
 ![sensors](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/sensor.png)
 
