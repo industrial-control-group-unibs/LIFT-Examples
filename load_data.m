@@ -19,7 +19,7 @@ Jm=0.1;          % Motor inertial
 Mc=600;          % Mass of the cabin (no people)
 Mw=1140;         % Mass of the counterweight
 MotorViscousFriction=1;
-Rp=0.5;
+Rp=0.5; % pulley radius
 g=9.806;
 mu=0.8;
 gearbox=1;
@@ -49,14 +49,14 @@ damping=damping_coefficient*(Mc+max_load)*(2*wn);
 
 LinearDamping=damping*(BuildingHeight+min_length);   
 
-%% Motion Profile
+%% Motion Profile DATA
 motion_profile=1;  % 1: single speed, 2: dual speed(not implemented yet)
 proximity_distance=1; % distance of proximity sensor w.r.t. the floor (used in profile 2: dual speed)
 
 MaxVel=1.5; % max velocity of the lift (m/s)
 MinVel=0.2; % low velocity of the lift (m/s)
 MaxAcc=1;   % max acceleration of the lift (m/s^2)
-MaxJerk=0.5%5;  % max jerk of the lift (m/s^3)
+MaxJerk=5;  % max jerk of the lift (m/s^3)
 
 waiting_time_open_door=2;    % Time to open the doors
 waiting_time_close_door=2;   % Time to close the doors
@@ -79,7 +79,7 @@ if (motion_profile==1)
     end
 end
 
-%% LINEARIZAZION
+%% LINEARIZAZION (TEST AND CONTROL PART)
 
 LinearizationCabinPosition=BuildingHeight*0.5; %meter
 dc=0; % force on cabin in the linearizing point
