@@ -19,11 +19,12 @@ You have to load the data running load_data.m
 
 You have to use the library:
 
-[DYNAMICAL MODEL] "LumpedParameterLiftModel", and 
-[CONTROL AND MOTION PLANNING] "LiftMotionControlLibrary".
+[DYNAMICAL MODEL] -  "LumpedParameterLiftModel"; \
+[CONTROL AND MOTION PLANNING] -  "LiftMotionControlLibrary".
 
 
-The simulink scheme consists of: (from left to right)
+The simulink scheme consists of: \
+(from left to right)
 
 ![complete scheme](https://github.com/industrial-control-group-unibs/LIFT-Examples/blob/main/docs/complete_model.png)
 
