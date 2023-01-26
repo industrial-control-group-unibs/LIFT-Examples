@@ -56,7 +56,7 @@ proximity_distance=1; % distance of proximity sensor w.r.t. the floor (used in p
 MaxVel=1.5; % max velocity of the lift (m/s)
 MinVel=0.2; % low velocity of the lift (m/s)
 MaxAcc=1;   % max acceleration of the lift (m/s^2)
-MaxJerk=0.01%5;  % max jerk of the lift (m/s^3)
+MaxJerk=0.5%5;  % max jerk of the lift (m/s^3)
 
 waiting_time_open_door=2;    % Time to open the doors
 waiting_time_close_door=2;   % Time to close the doors
@@ -66,6 +66,18 @@ waiting_time_steady_state=5; % Time to reach zero velocity
 cabin_offset=0; % it should be tuned based on the control performance
 
 Ts=1e-3; % Sample period
+
+
+if (motion_profile==1)
+    if (MaxVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
+        deceleration_distance=(CruiseVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
+    else % case 2
+        deceleration_distance =MaxVel^(3/2)/MaxJerk^(1/2);
+    end
+    if (deceleration_distance>=min(floor_height,cabin_height))
+        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance,floor_height);
+    end
+end
 
 %% LINEARIZAZION
 
