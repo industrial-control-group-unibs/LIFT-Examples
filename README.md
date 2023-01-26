@@ -17,7 +17,10 @@ There are two examples:
 
 You have to load the data running load_data.m
 
-You have to use the library: [DYNAMICAL MODEL] "LumpedParameterLiftModel" and [CONTROL AND MOTION PLANNING] "LiftMotionControlLibrary".
+You have to use the library:
+
+[DYNAMICAL MODEL] "LumpedParameterLiftModel", and 
+[CONTROL AND MOTION PLANNING] "LiftMotionControlLibrary".
 
 
 The simulink scheme consists of: (from left to right)
