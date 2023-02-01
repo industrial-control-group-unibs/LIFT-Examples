@@ -54,6 +54,10 @@ In this block, there is also the PID implementation.
 (4) Assert if the lift crashes.
 
 
+## back-compabilities
+
+- 2023/02/01. Variable "cabin_height" has been renamed "sensor_height". _sensor_height_ represent the physical dimension of magnitic band that turns on the on-off switch, typically ~10 cm.
+
 ## Ack
 
 This work was partially supported by IMOCO4.E project (H2020-ECSEL, European Commission – G.A.101007311).
