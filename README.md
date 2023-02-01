@@ -56,7 +56,7 @@ In this block, there is also the PID implementation.
 
 ## back-compabilities
 
-- 2023/02/01. Variable "cabin_height" has been renamed "sensor_height". _sensor_height_ represent the physical dimension of magnitic band that turns on the on-off switch, typically ~10 cm.
+- 2023/02/01. Variable "cabin_height" has been renamed "sensor_height". _sensor_height_ represent the physical dimension of magnetic band that turns on the on-off switch, typically ~10 cm.
 
 ## Ack
 
