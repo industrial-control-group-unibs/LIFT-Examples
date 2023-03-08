@@ -120,7 +120,7 @@ total_inertia_on_motor_side=(Jm+gearbox^2*(Jp+(Mw+Mc)*Rp^2));
 
 
 if 1
-    wc=30; % cut frequency
+    wc=10; % cut frequency
     filter=c2d(tf(1,[1/(10*wc) 1]),Ts); % filter frequency = 10*wc
     
     % the lift has an unstable pole (without control, it falls)
