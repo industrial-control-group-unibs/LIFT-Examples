@@ -26,7 +26,7 @@ gearbox=1;
 
 max_load=2*(Mw-Mc);  % maximum load
 BuildingHeight=num_floors*floor_height; 
-cabin_height=2.8;
+sensor_height=0.1;
 
 
 
@@ -50,13 +50,13 @@ damping=damping_coefficient*(Mc+max_load)*(2*wn);
 LinearDamping=damping*(BuildingHeight+min_length);   
 
 %% Motion Profile DATA
-motion_profile=1;  % 1: single speed, 2: dual speed(not implemented yet)
+motion_profile=2;  % 1: single speed, 2: dual speed(not implemented yet)
 proximity_distance=1; % distance of proximity sensor w.r.t. the floor (used in profile 2: dual speed)
 
 MaxVel=1.5; % max velocity of the lift (m/s)
 MinVel=0.2; % low velocity of the lift (m/s)
 MaxAcc=1;   % max acceleration of the lift (m/s^2)
-MaxJerk=5;  % max jerk of the lift (m/s^3)
+MaxJerk=1.5;  % max jerk of the lift (m/s^3)
 
 waiting_time_open_door=2;    % Time to open the doors
 waiting_time_close_door=2;   % Time to close the doors
@@ -74,8 +74,28 @@ if (motion_profile==1)
     else % case 2
         deceleration_distance =MaxVel^(3/2)/MaxJerk^(1/2);
     end
-    if (deceleration_distance>=min(floor_height,cabin_height))
-        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance,floor_height);
+    if (deceleration_distance>=min(floor_height,sensor_height))
+        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance,min(floor_height,sensor_height));
+    end
+else %motion_profile_2
+
+    DiffVel=MaxVel-MinVel;
+    if (DiffVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
+        deceleration_distance_max_speed=(DiffVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
+    else % case 2
+        deceleration_distance_max_speed =DiffVel^(3/2)/MaxJerk^(1/2);
+    end
+    if (MinVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
+        deceleration_distance_min_speed=(MinVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
+    else % case 2
+        deceleration_distance_min_speed =MinVel^(3/2)/MaxJerk^(1/2);
+    end
+    if (deceleration_distance_max_speed>=floor_height-proximity_distance)
+        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance_max_speed,min(floor_height,sensor_height)-proximity_distance);
+    end
+
+    if (deceleration_distance_min_speed>=floor_height-proximity_distance)
+        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance_min_speed,proximity_distance);
     end
 end
 
