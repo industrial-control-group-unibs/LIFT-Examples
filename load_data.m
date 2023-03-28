@@ -11,6 +11,22 @@ end
 
 
 %% MODEL PARAMETERS
+weg_tower=true;
+if (weg_tower)
+    floor_height=3;  % height of a single floor
+num_floors=3;   % number of floors of the building
+min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
+Jp=1;            % Pulley inertia
+Jm=0.1;          % Motor inertial
+Mc=442;          % Mass of the cabin (no people)
+Mw=1240;         % Mass of the counterweight
+MotorViscousFriction=1;
+Rp=0.32; % pulley radius
+g=9.806;
+mu=0.8;
+gearbox=1;
+
+else
 floor_height=3;  % height of a single floor
 num_floors=20;   % number of floors of the building
 min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
@@ -23,6 +39,7 @@ Rp=0.5; % pulley radius
 g=9.806;
 mu=0.8;
 gearbox=1;
+end
 
 max_load=2*(Mw-Mc);  % maximum load
 BuildingHeight=num_floors*floor_height; 
@@ -32,7 +49,11 @@ sensor_height=0.1;
 
 %% estimation of the stiffness
 % assumption => deflection of the rope at the maximum extension is 
-deflection=2e-2; % in meter
+if weg_tower
+    deflection=1e-3;
+else
+    deflection=2e-2; % in meter
+end
 stiffness=(Mc+max_load)*g/deflection;
 
 LinearStiffness=stiffness*(BuildingHeight+min_length); % stiffness=LinearStiffness/max rope length
@@ -42,8 +63,11 @@ wn=sqrt(stiffness/(Mc+max_load)); %natural frequency at the maximum extension
 %% estimation of the damping
 % assumption => damping coefficient  at the maximum extension
 % of the mass-spring-damper on the cabin side is
-
-damping_coefficient=0.1; %2*damping_coefficient*wn=damping/(Mc+max_load)
+if weg_tower
+    damping_coefficient=0.2; %2*damping_coefficient*wn=damping/(Mc+max_load)
+else
+    damping_coefficient=0.1;
+end
 damping=damping_coefficient*(Mc+max_load)*(2*wn);
 
 
@@ -75,11 +99,18 @@ Ts=1e-3; % Sample period
 [t1a,t2a,t3a,deceleration_distance]=computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,HighSpeed,LowSpeed,Deceleration*PercentAccFactor);
 [t1b,t2b,t3b,proximity_deceleration_distance]  =computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,LowSpeed,0,StopDeceleration*PercentAccFactor);
 
-lower_floor_sensor_positions=3*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
-upper_floor_sensor_positions=3*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
-lower_proximity_sensor_positions=3*(0:num_floors-1)'-proximity_deceleration_distance;
-upper_proximity_sensor_positions=3*(0:num_floors-1)'+proximity_deceleration_distance;
-
+if weg_tower
+    lower_floor_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
+    upper_floor_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
+    lower_proximity_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance;
+    upper_proximity_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance;
+    upper_proximity_sensor_positions(1)=proximity_deceleration_distance+0.2;
+else
+lower_floor_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
+upper_floor_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
+lower_proximity_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance;
+upper_proximity_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance;
+end
 %%
 
 
@@ -115,7 +146,11 @@ if 1
     filter_resonance=zpk(sys_poses(resonance_poles),[notch_poles' -5*max(Wn(resonance_poles))],1);
     filter_resonance=filter_resonance/dcgain(filter_resonance);
     filter_resonance_d=c2d(filter_resonance,Ts);
-    wc=10; % cut frequency
+    if (weg_tower)
+        wc=50;
+    else
+        wc=10; % cut frequency
+    end
     filter=c2d(tf(1,[1/(10*wc) 1]),Ts); % filter frequency = 10*wc
     
     % the lift has an unstable pole (without control, it falls)
