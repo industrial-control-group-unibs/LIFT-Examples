@@ -50,13 +50,17 @@ damping=damping_coefficient*(Mc+max_load)*(2*wn);
 LinearDamping=damping*(BuildingHeight+min_length);   
 
 %% Motion Profile DATA
-motion_profile=2;  % 1: single speed, 2: dual speed(not implemented yet)
-proximity_distance=1; % distance of proximity sensor w.r.t. the floor (used in profile 2: dual speed)
+HighSpeed = 1.0;
+LowSpeed = 0.07;
+PercentAccFactor = 1.0;
 
-MaxVel=1.5; % max velocity of the lift (m/s)
-MinVel=0.2; % low velocity of the lift (m/s)
-MaxAcc=1;   % max acceleration of the lift (m/s^2)
-MaxJerk=1.5;  % max jerk of the lift (m/s^3)
+AccelInitialJerk = 0.2;
+Acceleration = 0.6;
+AccelEndJerk = 0.6;
+DecelInitialJerk = 0.6;
+Deceleration = 0.31;
+DecelEndJerk = 0.5;
+StopDeceleration = 0.3;
 
 waiting_time_open_door=2;    % Time to open the doors
 waiting_time_close_door=2;   % Time to close the doors
@@ -67,37 +71,17 @@ cabin_offset=0; % it should be tuned based on the control performance
 
 Ts=1e-3; % Sample period
 
+%% Switch position
+[t1a,t2a,t3a,deceleration_distance]=computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,HighSpeed,LowSpeed,Deceleration*PercentAccFactor);
+[t1b,t2b,t3b,proximity_deceleration_distance]  =computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,LowSpeed,0,StopDeceleration*PercentAccFactor);
 
-if (motion_profile==1)
-    if (MaxVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
-        deceleration_distance=(MaxVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
-    else % case 2
-        deceleration_distance =MaxVel^(3/2)/MaxJerk^(1/2);
-    end
-    if (deceleration_distance>=min(floor_height,sensor_height))
-        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance,min(floor_height,sensor_height));
-    end
-else %motion_profile_2
+lower_floor_sensor_positions=3*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
+upper_floor_sensor_positions=3*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
+lower_proximity_sensor_positions=3*(0:num_floors-1)'-proximity_deceleration_distance;
+upper_proximity_sensor_positions=3*(0:num_floors-1)'+proximity_deceleration_distance;
 
-    DiffVel=MaxVel-MinVel;
-    if (DiffVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
-        deceleration_distance_max_speed=(DiffVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
-    else % case 2
-        deceleration_distance_max_speed =DiffVel^(3/2)/MaxJerk^(1/2);
-    end
-    if (MinVel^(1/2)*MaxJerk^(1/2)>MaxAcc) % case 1
-        deceleration_distance_min_speed=(MinVel*(MaxAcc^2 + MaxVel*MaxJerk))/(2*MaxAcc*MaxJerk);
-    else % case 2
-        deceleration_distance_min_speed =MinVel^(3/2)/MaxJerk^(1/2);
-    end
-    if (deceleration_distance_max_speed>=floor_height-proximity_distance)
-        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance_max_speed,min(floor_height,sensor_height)-proximity_distance);
-    end
+%%
 
-    if (deceleration_distance_min_speed>=floor_height-proximity_distance)
-        error('Wrong limits: deceleration distance is %4.2f m while the switch distance is %4.2f m\n',deceleration_distance_min_speed,proximity_distance);
-    end
-end
 
 %% LINEARIZAZION (TEST AND CONTROL PART)
 
@@ -120,6 +104,17 @@ total_inertia_on_motor_side=(Jm+gearbox^2*(Jp+(Mw+Mc)*Rp^2));
 
 
 if 1
+
+    sys_poses=pole(sys);
+    [Wn,damping]=damp(sys_poses);
+
+    resonance_poles=boolean((damping<0.8).*(damping>0));
+    damping_notch=0.8;
+    notch_poles=-Wn(resonance_poles)*(damping_notch+ 1i*sqrt(1-damping_notch^2));
+    notch_poles(2:2:end)=real(notch_poles(2:2:end))-1i*imag(notch_poles(2:2:end));
+    filter_resonance=zpk(sys_poses(resonance_poles),[notch_poles' -5*max(Wn(resonance_poles))],1);
+    filter_resonance=filter_resonance/dcgain(filter_resonance);
+    filter_resonance_d=c2d(filter_resonance,Ts);
     wc=10; % cut frequency
     filter=c2d(tf(1,[1/(10*wc) 1]),Ts); % filter frequency = 10*wc
     
@@ -127,9 +122,9 @@ if 1
     opt = pidtuneOptions('NumUnstablePoles',sum(abs(pole(sysd))>=1));
     
     % use PIDTuner
-    pid_ctrl=pidtune(sysd*filter,'PI',wc,opt);
+    pid_ctrl=pidtune(sysd*filter*filter_resonance_d,'PI',wc,opt);
 
-    ctrl=pid_ctrl*filter;
+    ctrl=pid_ctrl*filter*filter_resonance_d;
 else
     filter=c2d(tf(1,[1/(20) 1]),Ts);
     pid_ctrl=pid(1600,1200,'Ts',Ts);
