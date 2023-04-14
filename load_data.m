@@ -13,7 +13,6 @@ end
 %% MODEL PARAMETERS
 weg_tower=true;
 if (weg_tower)
-    floor_height=3;  % height of a single floor
 num_floors=3;   % number of floors of the building
 min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
 Jp=1;            % Pulley inertia
@@ -25,7 +24,8 @@ Rp=0.32; % pulley radius
 g=9.806;
 mu=0.8;
 gearbox=1;
-
+BuildingHeight=12.4489; 
+FloorHeight=[0 4.2321 12.4489];
 else
 floor_height=3;  % height of a single floor
 num_floors=20;   % number of floors of the building
@@ -39,10 +39,11 @@ Rp=0.5; % pulley radius
 g=9.806;
 mu=0.8;
 gearbox=1;
+BuildingHeight=num_floors*floor_height; 
+FloorHeight=(0:num_floors-1)*floor_height;
 end
 
 max_load=2*(Mw-Mc);  % maximum load
-BuildingHeight=num_floors*floor_height; 
 sensor_height=0.1;
 
 
@@ -100,16 +101,15 @@ Ts=1e-3; % Sample period
 [t1b,t2b,t3b,proximity_deceleration_distance]  =computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,LowSpeed,0,StopDeceleration*PercentAccFactor);
 
 if weg_tower
+    lower_floor_sensor_positions=    [-.1   2.335  10.5];
+    lower_proximity_sensor_positions=[-.01  4.21   12.43];
+    upper_proximity_sensor_positions=[0.017 4.2549 12.45];
+    upper_floor_sensor_positions=    [1.892 6.166  12.45];
+else
     lower_floor_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
     upper_floor_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
     lower_proximity_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance;
     upper_proximity_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance;
-    upper_proximity_sensor_positions(1)=proximity_deceleration_distance+0.2;
-else
-lower_floor_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
-upper_floor_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
-lower_proximity_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance;
-upper_proximity_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance;
 end
 %%
 
