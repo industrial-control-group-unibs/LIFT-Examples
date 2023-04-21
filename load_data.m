@@ -1,12 +1,13 @@
 clear all;close all;clc
 
 if ~exist('LiftLinearSystem')
-    addpath(['..',filesep,'lift_lumped_parater_model\'])
-    addpath(['..',filesep,'lift_lumped_parater_model\NonLinearElasticModel'])
+    addpath(['..',filesep,'IMOCO_LIFT_MODEL\'])
+    addpath(['..',filesep,'IMOCO_LIFT_MODEL\NonLinearElasticModel'])
 end
 
 if ~exist('LiftLogic')
-    addpath(['..',filesep,'LiftMotionLaw\'])
+    addpath(['..',filesep,'IMOCO-Lift-Motion-Law\'])
+    addpath(['..',filesep,'IMOCO-Lift-Motion-Law\internal_and_tests'])
 end
 
 
