@@ -128,7 +128,9 @@ C=[0 0 0 0 0 0 0 0 0 1]; % velocity control
 Cp=[0 0 0 0 0 0 0 0 1 0]; % position
 D=0;
 mimo_sys=ss(A,[B,B_dc],[C;Cp],D);
-sys=miso_sys(1,1);
+mimo_sys.OutputName={'motor vel','motor pos'};
+mimo_sys.InputName={'motor torque','force on cabin'};
+sys=mimo_sys(1,1);
 sysd=c2d(sys,Ts);
 
 
