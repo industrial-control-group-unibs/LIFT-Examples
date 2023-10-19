@@ -14,34 +14,34 @@ end
 %% MODEL PARAMETERS
 weg_tower=true;
 if (weg_tower)
-num_floors=3;   % number of floors of the building
-min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
-Jp=1;            % Pulley inertia
-Jm=0.1;          % Motor inertial
-Mc=442;          % Mass of the cabin (no people)
-Mw=1240;         % Mass of the counterweight
-MotorViscousFriction=1;
-Rp=0.32; % pulley radius
-g=9.806;
-mu=0.8;
-gearbox=1;
-BuildingHeight=12.4489; 
-FloorHeight=[0 4.2321 12.4489];
+    num_floors=3;   % number of floors of the building
+    min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
+    Jp=1;            % Pulley inertia
+    Jm=0.1;          % Motor inertial
+    Mc=442;          % Mass of the cabin (no people)
+    Mw=1240;         % Mass of the counterweight
+    MotorViscousFriction=1;
+    Rp=0.32; % pulley radius
+    g=9.806;
+    mu=0.8;
+    gearbox=1;
+    BuildingHeight=12.4489;
+    FloorHeight=[0 4.2321 12.4489];
 else
-floor_height=3;  % height of a single floor
-num_floors=20;   % number of floors of the building
-min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
-Jp=1;            % Pulley inertia
-Jm=0.1;          % Motor inertial
-Mc=600;          % Mass of the cabin (no people)
-Mw=1140;         % Mass of the counterweight
-MotorViscousFriction=1;
-Rp=0.5; % pulley radius
-g=9.806;
-mu=0.8;
-gearbox=1;
-BuildingHeight=num_floors*floor_height; 
-FloorHeight=(0:num_floors-1)*floor_height;
+    floor_height=3;  % height of a single floor
+    num_floors=20;   % number of floors of the building
+    min_length=3;    % distance between the cabin and the pullet at the maximum position (minimal lenght of the rope)
+    Jp=1;            % Pulley inertia
+    Jm=0.1;          % Motor inertial
+    Mc=600;          % Mass of the cabin (no people)
+    Mw=1140;         % Mass of the counterweight
+    MotorViscousFriction=1;
+    Rp=0.5; % pulley radius
+    g=9.806;
+    mu=0.8;
+    gearbox=1;
+    BuildingHeight=num_floors*floor_height;
+    FloorHeight=(0:num_floors-1)*floor_height;
 end
 
 max_load=2*(Mw-Mc);  % maximum load
@@ -50,7 +50,7 @@ sensor_height=0.1;
 
 
 %% estimation of the stiffness
-% assumption => deflection of the rope at the maximum extension is 
+% assumption => deflection of the rope at the maximum extension is
 if weg_tower
     deflection=1e-3;
 else
@@ -73,7 +73,7 @@ end
 damping=damping_coefficient*(Mc+max_load)*(2*wn);
 
 
-LinearDamping=damping*(BuildingHeight+min_length);   
+LinearDamping=damping*(BuildingHeight+min_length);
 
 %% Motion Profile DATA
 HighSpeed = 1.0;
@@ -98,8 +98,6 @@ cabin_offset=0; % it should be tuned based on the control performance
 Ts=1e-3; % Sample period
 
 %% Switch position
-[t1a,t2a,t3a,deceleration_distance]=computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,HighSpeed,LowSpeed,Deceleration*PercentAccFactor);
-[t1b,t2b,t3b,proximity_deceleration_distance]  =computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,LowSpeed,0,StopDeceleration*PercentAccFactor);
 
 if weg_tower
     lower_floor_sensor_positions=    [-.1   2.335  10.5];
@@ -107,6 +105,8 @@ if weg_tower
     upper_proximity_sensor_positions=[0.017 4.2549 12.45];
     upper_floor_sensor_positions=    [1.892 6.166  12.45];
 else
+    [t1a,t2a,t3a,deceleration_distance]=computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,HighSpeed,LowSpeed,Deceleration*PercentAccFactor);
+    [t1b,t2b,t3b,proximity_deceleration_distance]  =computeSwitchDistance(DecelInitialJerk*PercentAccFactor,DecelEndJerk*PercentAccFactor,0,LowSpeed,0,StopDeceleration*PercentAccFactor);
     lower_floor_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance-deceleration_distance;
     upper_floor_sensor_positions=floor_height*(0:num_floors-1)'+proximity_deceleration_distance+deceleration_distance;
     lower_proximity_sensor_positions=floor_height*(0:num_floors-1)'-proximity_deceleration_distance;
@@ -121,12 +121,14 @@ LinearizationCabinPosition=BuildingHeight*0.5; %meter
 dc=0; % force on cabin in the linearizing point
 dw=0; % force on counterweight in the linearizing point
 % compute equilibrium in the linearizing point
-[x_eq,u_eq] = LiftEquilibrium(BuildingHeight,LinearStiffness,Mc,Mw,Rp,dc,dw,g,gearbox,min_length,mu,LinearizationCabinPosition); 
+[x_eq,u_eq] = LiftEquilibrium(BuildingHeight,LinearStiffness,Mc,Mw,Rp,dc,dw,g,gearbox,min_length,mu,LinearizationCabinPosition);
 % linearized system
-[A,B] = LiftLinearSystem(BuildingHeight,Jm,Jp,LinearDamping,LinearStiffness,Mc,MotorViscousFriction,Mw,Rp,dc,dw,g,gearbox,min_length,mu,x_eq(9));
+[A,B,B_dc] = LiftLinearSystem(BuildingHeight,Jm,Jp,LinearDamping,LinearStiffness,Mc,MotorViscousFriction,Mw,Rp,dc,dw,g,gearbox,min_length,mu,x_eq(9));
 C=[0 0 0 0 0 0 0 0 0 1]; % velocity control
+Cp=[0 0 0 0 0 0 0 0 1 0]; % position
 D=0;
-sys=ss(A,B,C,D);
+mimo_sys=ss(A,[B,B_dc],[C;Cp],D);
+sys=miso_sys(1,1);
 sysd=c2d(sys,Ts);
 
 
@@ -153,10 +155,10 @@ if 1
         wc=10; % cut frequency
     end
     filter=c2d(tf(1,[1/(10*wc) 1]),Ts); % filter frequency = 10*wc
-    
+
     % the lift has an unstable pole (without control, it falls)
     opt = pidtuneOptions('NumUnstablePoles',sum(abs(pole(sysd))>=1));
-    
+
     % use PIDTuner
     pid_ctrl=pidtune(sysd*filter*filter_resonance_d,'PI',wc,opt);
 
