@@ -135,6 +135,8 @@ sys=mimo_sys(1,1);
 sysd=c2d(sys,Ts);
 
 
+
+
 total_inertia_on_motor_side=(Jm+gearbox^2*(Jp+(Mw+Mc)*Rp^2));
 
 %% tune controller (PI+ LowPassFilter)
